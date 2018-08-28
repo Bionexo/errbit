@@ -43,7 +43,6 @@ namespace :errbit do
       end
     end
   end
-end
 
  desc 'Resolves problems that didnt occur for 3 months - by trentas'
   task cleanup: :environment do
