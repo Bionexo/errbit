@@ -43,4 +43,26 @@ namespace :errbit do
       end
     end
   end
+
+  desc 'Resolves problems that didnt occur for 3 months - by trentas'
+  task cleanup: :environment do
+    offset = 3.months.ago
+    Problem.where(:updated_at.lt => offset).map(&:resolve!)
+    Notice.where(:updated_at.lt => offset).destroy_all
+  end
+
+  desc "Remove old notices in batch - by isucupira"
+  task notices_purge: :environment do
+    PURGE_OFFSET = 2.months.ago
+    REPORT_INTERVAL = 100
+    puts "Will purge notices older than #{PURGE_OFFSET}"
+    removed_count = 0
+    # Mongoid already batches results, so it's much more efficient if we don't try to do this manually.
+    Notice.where(:updated_at.lt => PURGE_OFFSET).each do |notice|
+      notice.destroy
+      removed_count += 1
+      puts "Removed #{removed_count} notices" if removed_count % REPORT_INTERVAL == 0
+    end
+    puts "Finished. #{removed_count} notices removed"
+  end
 end
